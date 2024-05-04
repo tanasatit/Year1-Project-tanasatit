@@ -75,6 +75,7 @@ class ApplicationUI(tk.Tk):
         if old_frame.winfo_children():
             for widget in old_frame.winfo_children():
                 widget.grid_forget()
+
         plt.close('all')
 
     # info page
@@ -114,6 +115,7 @@ class ApplicationUI(tk.Tk):
 
         self.att1 = tk.StringVar()
         attribute1_options = ['Discount(%)', 'OriginalPrice(THB)', 'DiscountPrice(THB)', 'Rating', 'Rating_count']
+        attribute2_options = ['Publisher', 'Genre']
         self.att1.set('')
         attribute1 = tk.OptionMenu(self.stat_settings_frame, self.att1, *attribute1_options)
         attribute1.grid(row=4, column=1)
@@ -144,12 +146,19 @@ class ApplicationUI(tk.Tk):
         attribute1 = self.att1.get()
         # attribute2 = self.att2.get()
 
-        if graph_type in ['Bar graph', 'Pie chart']:
+        if graph_type == 'Bar graph':
             x = self.graph.create_distribution_graph(attribute1)
             dis = FigureCanvasTkAgg(x, master=self.stat_graph_frame)
             dis.draw()
             self.stat_graph_frame.grid_forget()
             dis.get_tk_widget().grid(row=1, column=0, columnspan=2)
+            self.stat_graph_frame.grid(row=0, column=0)
+        elif graph_type == 'Pie chart':
+            x = self.graph.create_pie_chart(attribute1)
+            pie = FigureCanvasTkAgg(x, master=self.stat_graph_frame)
+            pie.draw()
+            self.stat_graph_frame.grid_forget()
+            pie.get_tk_widget().grid(row=1, column=0, columnspan=2)
             self.stat_graph_frame.grid(row=0, column=0)
         else:
             # self.DB.create_scatter_plot(attribute1, attribute2)
@@ -157,16 +166,23 @@ class ApplicationUI(tk.Tk):
 
     def reset(self):
         self.att0.set('My Graph')
-        self.text_graph.set('')
-        self.att1.set('')
-        # self.att2.set('')
+        self.text_graph.set(' ')
+        self.att1.set(' ')
+        # self.att2.set(' ')
+
+        for widget in self.stat_graph_frame.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.stat_graph_frame, bg='white', fg='black', text='Statistic is coming soon',
+                 height=20, width=40).grid(row=1, column=0, columnspan=2)
 
     # Data story
     def create_data_storytelling_page(self):
         self.change_frame(self.current_frame, self.data_story_frame)
 
-        tk.Label(self.data_story_frame, bg='#ebd694', fg='black', text='Data Storytelling page is coming soon', height=20,
-                  width=40).grid(column=0, row=0)
+        tk.Label(self.data_story_frame, bg='#ebd694', fg='black', text='Data Storytelling page is coming soon',
+                 height=20,
+                 width=40).grid(column=0, row=0)
 
         # self.att3 = tk.StringVar()
         # self.att3.set('Select Graph')
@@ -180,13 +196,11 @@ class ApplicationUI(tk.Tk):
         # test_graph = tk.Frame(self.about_frame)
 
         tk.Label(self.about_frame, bg='#edabe4', fg='#690218', text='this is About page...', height=20,
-                  width=40).grid(column=0, row=0)
+                 width=40).grid(column=0, row=0)
 
     def run(self):
         self.mainloop()
 
-
 # if __name__ == '__main__':
 #     app = ApplicationUI()
 #     app.run()
-

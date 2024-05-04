@@ -18,20 +18,23 @@ class GraphCreator:
         plt.xlabel(attribute)
         plt.ylabel("Frequency")
         plt.grid(True)
-        # plt.show()
         return plt.gcf()
 
-    def create_pie_chart(self):
-        pass
+    def create_pie_chart(self, attribute):
+        counts = self.df[attribute].value_counts()
+        plt.figure(figsize=(8, 6))
+        plt.pie(counts, labels=counts.index, autopct='%1.1f%%', startangle=140)
+        plt.title(f"Pie Chart of {attribute}")
+        return plt.gcf()
 
-    def create_line_graph(self):
-        pass
-
-    def create_bar_plot(self):
-        pass
-
-    def create_scatter_plot(self):
-        pass
+    # def create_line_graph(self):
+    #     pass
+    #
+    # def create_bar_plot(self):
+    #     pass
+    #
+    # def create_scatter_plot(self):
+    #     pass
 
     # Data Storytelling Part
     # def create_distribution_graph(self):
@@ -47,19 +50,16 @@ class GraphCreator:
     #     pass
 
     def create_scatter_plot_originalprice_rating(self):
-        action_games = self.df[self.df['Genre'] == 'Action'].copy()
+        actions = self.df[self.df['Genre'] == 'Action'].copy()
 
-        publisher_stats = action_games.groupby('Publisher').agg(
+        publisher_stats = actions.groupby('Publisher').agg(
             {'OriginalPrice(THB)': 'mean', 'Rating': 'mean', 'Title': 'count'}).reset_index()
         publisher_stats.rename(columns={'Title': 'GameCount'}, inplace=True)
 
-        # Select top 20 publishers by game count
         top_publishers = publisher_stats.nlargest(20, 'GameCount')
 
-        # Filter action_games by top publishers
-        action_games_top_publishers = action_games[action_games['Publisher'].isin(top_publishers['Publisher'])].copy()
+        action_games_top_publishers = actions[actions['Publisher'].isin(top_publishers['Publisher'])].copy()
 
-        # Calculate z-scores for OriginalPrice and Rating
         action_games_top_publishers.loc[:, 'OriginalPrice_zscore'] = (
                                                                              action_games_top_publishers[
                                                                                  'OriginalPrice(THB)'] -
@@ -72,7 +72,6 @@ class GraphCreator:
                                                                       action_games_top_publishers['Rating'].mean()) / \
                                                               action_games_top_publishers['Rating'].std()
 
-        # Define threshold for outliers (e.g., 3 standard deviations from the mean)
         outlier_threshold = 3
 
         # Remove outliers
@@ -98,8 +97,3 @@ class GraphCreator:
         # plt.show()
         return plt.gcf()
 
-
-# # Example usage:
-# if __name__ == "__main__":
-#     graph_creator = GraphCreator()
-#     graph_creator.create_distribution_graph('Discount(%)')  # Example of creating a distribution graph
