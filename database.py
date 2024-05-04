@@ -1,60 +1,77 @@
-import csv
-import os
-import copy
-import matplotlib
+import re
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from pandas.plotting import scatter_matrix
 
 
-df = pd.read_csv('historic_deals.csv')
-df.dropna(inplace=True)
+class PlayStationBD:
+    def __init__(self):
+        self.df = pd.read_csv('historic_deals.csv')
+        self.df.dropna(inplace=True)
+        self.new_df = self.df.copy()
+        # self.data_manage()
 
-new_df = df.copy()
-# DiscountPCT
-pass
+    def data_manage(self):
+        # Title
+        self.new_df['Edition'] = self.new_df['Title'].str.extract(r'\((.*?)\)')
+        self.new_df['Title'] = self.new_df['Title'].apply(lambda x: re.sub(r'\((.*?)\)', '', x))
 
+        # DiscountPCT
+        self.new_df.rename(columns={'DiscountPCT': 'Discount(%)'}, inplace=True)
+        self.new_df['Discount(%)'] = self.new_df['Discount(%)'].apply(lambda x: x.replace('%', '') if '%' in x else x)
+        self.new_df = self.new_df.drop(self.new_df[self.new_df['Discount(%)'] == 'Trial'].index)
+        self.new_df['Discount(%)'] = self.new_df['Discount(%)'].astype(int)
 
-# Original Price (Baht)
-new_df.rename(columns={'OriginalPrice': 'OriginalPrice(THB)'}, inplace=True)
-new_df['OriginalPrice(THB)'] = new_df['OriginalPrice(THB)'].apply(lambda x: x[3:])
-new_df['OriginalPrice(THB)'] = new_df['OriginalPrice(THB)'].apply(lambda x: x.replace(',','') if ',' in x else x)
-new_df['OriginalPrice(THB)'] = new_df['OriginalPrice(THB)'].apply(lambda x: float(round(float(x)*4.65)))
+        # Original Price (Baht)
+        self.new_df.rename(columns={'OriginalPrice': 'OriginalPrice(THB)'}, inplace=True)
+        self.new_df['OriginalPrice(THB)'] = self.new_df['OriginalPrice(THB)'].apply(lambda x: x[3:])
+        self.new_df['OriginalPrice(THB)'] = self.new_df['OriginalPrice(THB)'].apply(
+            lambda x: x.replace(',', '') if ',' in x else x)
+        self.new_df['OriginalPrice(THB)'] = self.new_df['OriginalPrice(THB)'].apply(
+            lambda x: float(round(float(x) * 4.65)))
 
+        # Discount Price (Baht)
+        self.new_df.rename(columns={'DiscountPrice': 'DiscountPrice(THB)'}, inplace=True)
+        self.new_df['DiscountPrice(THB)'] = self.new_df['DiscountPrice(THB)'].apply(lambda x: x[3:])
+        self.new_df['DiscountPrice(THB)'] = self.new_df['DiscountPrice(THB)'].apply(
+            lambda x: x.replace(',', '') if ',' in x else x)
+        self.new_df['DiscountPrice(THB)'] = self.new_df['DiscountPrice(THB)'].apply(
+            lambda x: float(round(float(x) * 4.65)))
 
-# Discount Price (Baht)
-new_df.rename(columns={'DiscountPrice': 'DiscountPrice(THB)'}, inplace=True)
-new_df['DiscountPrice(THB)'] = new_df['DiscountPrice(THB)'].apply(lambda x: x[3:])
-new_df['DiscountPrice(THB)'] = new_df['DiscountPrice(THB)'].apply(lambda x: x.replace(',','') if ',' in x else x)
-new_df['DiscountPrice(THB)'] = new_df['DiscountPrice(THB)'].apply(lambda x: float(round(float(x)*4.65)))
+        # Discount_endtime
+        self.new_df['Discount_Endtime'] = self.new_df['Discount_Endtime'].apply(lambda x: x[:-4])
+        self.new_df['Discount_Endtime'] = pd.to_datetime(self.new_df['Discount_Endtime'], format='%d/%m/%Y %I:%M %p')
 
+        # Rating
+        self.new_df['Rating'] = self.new_df['Rating'].apply(lambda x: x * 2)
 
-# Discount_endtime
-new_df['Discount_Endtime'] = new_df['Discount_Endtime'].apply(lambda x: x[:-4])
-new_df['Discount_Endtime'] = pd.to_datetime(new_df['Discount_Endtime'], format='%d/%m/%Y %I:%M %p')
+        # Rating Count
+        self.new_df['Rating_count'] = self.new_df['Rating_count'].apply(lambda x: x.replace('.', '') if '.' in x else x)
+        self.new_df['Rating_count'] = self.new_df['Rating_count'].apply(
+            lambda x: x.replace('k', '000') if 'k' in x else x)
+        self.new_df['Rating_count'] = self.new_df['Rating_count'].apply(
+            lambda x: x.replace('m', '000000') if 'm' in x else x)
+        self.new_df['Rating_count'] = pd.to_numeric(self.new_df['Rating_count'].replace('No', pd.NaT), errors='coerce')
+        self.new_df['Rating_count'] = self.new_df['Rating_count'].fillna(self.new_df['Rating_count'].median())
 
+        self.new_df['Rating_count'] = self.new_df['Rating_count'].astype(int)
 
-# Rating
-new_df['Rating'] = new_df['Rating'].apply(lambda x: round(x))
+        # Genre
+        pass
 
+        # ReleaseDate
+        self.new_df['ReleaseDate'] = pd.to_datetime(self.new_df['ReleaseDate'], format='%d/%m/%Y')
 
-# Rating Count
-new_df['Rating_count'] = new_df['Rating_count'].apply(lambda x: x.replace('.', '') if '.' in x else x)
-new_df['Rating_count'] = new_df['Rating_count'].apply(lambda x: x.replace('k', '000') if 'k' in x else x)
-new_df['Rating_count'] = new_df['Rating_count'].apply(lambda x: x.replace('m', '000000') if 'm' in x else x)
+        self.new_df = self.new_df[
+            ['Title', 'Edition', 'Publisher', 'Link', 'Discount(%)', 'OriginalPrice(THB)', 'DiscountPrice(THB)'
+                , 'Discount_Endtime', 'Rating', 'Rating_count', 'Genre', 'ReleaseDate']]
 
-new_df['Rating_count'] = pd.to_numeric(new_df['Rating_count'].replace('No', pd.NaT), errors='coerce')
-new_df['Rating_count'].fillna(new_df['Rating_count'].median(), inplace=True)
-new_df['Rating_count'] = new_df['Rating_count'].astype(int)
+        # pd.set_option('display.max_columns', None)
+        # print(self.new_df.head())
+        return self.new_df
 
-
-# Genre
-pass
-
-
-# ReleaseDate
-new_df['ReleaseDate'] = pd.to_datetime(new_df['ReleaseDate'], format='%d/%m/%Y')
-
-print(new_df.head())
+    def unique_genre(self):
+        combined_genres = self.new_df['Genre'].str.split(', ')
+        unique_genres = set()
+        for genres_list in combined_genres:
+            unique_genres.update(genres_list)
+        unique_genres = list(unique_genres)
+        return unique_genres
