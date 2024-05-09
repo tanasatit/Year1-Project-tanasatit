@@ -53,34 +53,33 @@ class ApplicationUI(tk.Tk):
     def load_page(self, name_page):
         if name_page == "Info":
             self.create_info_page()
-            self.current_frame = self.info_frame
         elif name_page == "Statistic":
             self.create_statistic_page()
-            self.current_frame = self.statistic_frame
         elif name_page == "Data Storytelling":
             self.create_data_storytelling_page()
-            self.current_frame = self.data_story_frame
         elif name_page == "About":
             self.create_about_page()
-            self.current_frame = self.about_frame
 
     def change_frame(self, old_frame, new_frame):
         """ Change from one frame to another frame """
         # Change from one frame to another frame
         if old_frame != new_frame:
             old_frame.pack_forget()
+            # old_frame.destroy()
             new_frame.pack()
 
         # Clear unused widgets
         if old_frame.winfo_children():
-            for widget in old_frame.winfo_children():
-                widget.grid_forget()
+            for frame in old_frame.winfo_children():
+                frame.grid_forget()
 
         plt.close('all')
+        self.current_frame = new_frame
 
     # info page
     def create_info_page(self):
         self.change_frame(self.current_frame, self.info_frame)
+        self.change_frame(self.stat_graph_frame, self.info_frame)
 
         tk.Label(self.info_frame, bg='black', fg='white', text='Info page is coming soon', height=20,
                  width=40).grid(column=0, row=0)
@@ -88,12 +87,17 @@ class ApplicationUI(tk.Tk):
     # Statistic page
     def create_statistic_page(self):
         self.change_frame(self.current_frame, self.statistic_frame)
+        self.change_frame(self.stat_graph_frame, self.statistic_frame)
+
+        for widget in self.stat_settings_frame.winfo_children():
+            # widget.destroy()
+            widget.grid_forget()
 
         # generate graph zone
         self.att0 = tk.StringVar()
         self.att0.set('My graph')
-        graph_side = tk.Label(self.stat_graph_frame, textvariable=self.att0)
-        graph_side.grid(row=0, column=0, columnspan=2)
+        graph_text = tk.Label(self.stat_graph_frame, textvariable=self.att0)
+        graph_text.grid(row=0, column=0, columnspan=2)
 
         show_my_graph = (tk.Label(self.stat_graph_frame, bg='white', fg='black', text='Statistic is coming soon',
                                   height=20, width=40).grid(row=1, column=0, columnspan=2))
@@ -103,7 +107,7 @@ class ApplicationUI(tk.Tk):
         text1.grid(row=0, column=0, columnspan=4)
 
         self.text_graph = tk.StringVar()
-        select_graph_options = ['Bar graph', 'Pie chart', 'Line graph', 'scatterplot']
+        select_graph_options = ['Histogram', 'Pie chart', 'Line graph', 'Scatterplot']
         select_graph = tk.OptionMenu(self.stat_settings_frame, self.text_graph, *select_graph_options)
         select_graph.grid(row=1, column=0, columnspan=4)
 
@@ -114,7 +118,7 @@ class ApplicationUI(tk.Tk):
         text3.grid(row=4, column=0)
 
         self.att1 = tk.StringVar()
-        attribute1_options = ['Discount(%)', 'OriginalPrice(THB)', 'DiscountPrice(THB)', 'Rating', 'Rating_count']
+        attribute1_options = ['Discount(%)', 'OriginalPrice(THB)', 'DiscountPrice(THB)', 'Rating', 'Rating_count', 'Publisher', 'Genre']
         attribute2_options = ['Publisher', 'Genre']
         self.att1.set('')
         attribute1 = tk.OptionMenu(self.stat_settings_frame, self.att1, *attribute1_options)
@@ -146,7 +150,7 @@ class ApplicationUI(tk.Tk):
         attribute1 = self.att1.get()
         # attribute2 = self.att2.get()
 
-        if graph_type == 'Bar graph':
+        if graph_type == 'Histogram':
             x = self.graph.create_distribution_graph(attribute1)
             dis = FigureCanvasTkAgg(x, master=self.stat_graph_frame)
             dis.draw()
@@ -159,6 +163,13 @@ class ApplicationUI(tk.Tk):
             pie.draw()
             self.stat_graph_frame.grid_forget()
             pie.get_tk_widget().grid(row=1, column=0, columnspan=2)
+            self.stat_graph_frame.grid(row=0, column=0)
+        elif graph_type == 'Scatterplot':
+            x = self.graph.create_scatter_plot_originalprice_rating()
+            sca = FigureCanvasTkAgg(x, master=self.stat_graph_frame)
+            sca.draw()
+            self.stat_graph_frame.grid_forget()
+            sca.get_tk_widget().grid(row=1, column=0, columnspan=2)
             self.stat_graph_frame.grid(row=0, column=0)
         else:
             # self.DB.create_scatter_plot(attribute1, attribute2)
@@ -173,6 +184,7 @@ class ApplicationUI(tk.Tk):
         for widget in self.stat_graph_frame.winfo_children():
             widget.destroy()
 
+        tk.Label(self.stat_graph_frame, textvariable=self.att0).grid(row=0, column=0, columnspan=2)
         tk.Label(self.stat_graph_frame, bg='white', fg='black', text='Statistic is coming soon',
                  height=20, width=40).grid(row=1, column=0, columnspan=2)
 
@@ -194,7 +206,7 @@ class ApplicationUI(tk.Tk):
         self.change_frame(self.current_frame, self.about_frame)
 
         # test_graph = tk.Frame(self.about_frame)
-
+        # self.graph_text.grid(row=0, column=0, columnspan=2)
         tk.Label(self.about_frame, bg='#edabe4', fg='#690218', text='this is About page...', height=20,
                  width=40).grid(column=0, row=0)
 

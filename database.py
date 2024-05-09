@@ -7,7 +7,6 @@ class PlayStationBD:
         self.df = pd.read_csv('historic_deals.csv')
         self.df.dropna(inplace=True)
         self.new_df = self.df.copy()
-        # self.data_manage()
 
     def data_manage(self):
         # Title
@@ -64,8 +63,6 @@ class PlayStationBD:
             ['Title', 'Edition', 'Publisher', 'Link', 'Discount(%)', 'OriginalPrice(THB)', 'DiscountPrice(THB)'
                 , 'Discount_Endtime', 'Rating', 'Rating_count', 'Genre', 'ReleaseDate']]
 
-        # pd.set_option('display.max_columns', None)
-        # print(self.new_df.head())
         return self.new_df
 
     def unique_genre(self):
@@ -75,3 +72,16 @@ class PlayStationBD:
             unique_genres.update(genres_list)
         unique_genres = list(unique_genres)
         return unique_genres
+
+    def rating_count_without_outliners(self):
+        Q1 = self.new_df['Rating_count'].quantile(0.25)
+        Q3 = self.new_df['Rating_count'].quantile(0.75)
+        IQR = Q3 - Q1
+
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        new_new_df = self.new_df[(self.new_df['Rating_count'] >= lower_bound)
+                                 & (self.new_df['Rating_count'] <= upper_bound)]
+        return new_new_df
+
