@@ -8,6 +8,7 @@ class DataManager:
         self.DB = PlayStationDB()
         self.df = self.DB.data_manage()
         self.new_df = self.df.drop(['Link'], axis=1)
+        self.sorted_df = None
 
     def get_data(self):
         return self.new_df
@@ -117,9 +118,12 @@ class DataManager:
                 self.sorted_df = self.new_df.sort_values(by=attribute1, ascending=False)
             elif attribute2 == 'Oldest to Newest':
                 self.sorted_df = self.new_df.sort_values(by=attribute1, ascending=True)
+            elif attribute1 == 'Genre':
+                self.sorted_df = self.new_df[self.new_df['Genre'] == attribute2]
 
             # Update the result table with the sorted data
-            self.update_result_table_from_df(self.sorted_df, result_table)
+            if self.sorted_df is not None:
+                self.update_result_table_from_df(self.sorted_df, result_table)
 
     def update_result_table_from_df(self, df, result_table):
         # Clear the existing table
