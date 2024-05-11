@@ -22,12 +22,11 @@ https://www.kaggle.com/datasets/crxxom/ps5-discount-games
 
 ## ApplicationUI
 Info page
-/Users/tanasatit/final_com2/Year1-Project-tanasatit/Image/Screenshot 2567-05-11 at 20.23.02.png
+https://github.com/tanasatit/Year1-Project-tanasatit/blob/0319d6dd6b3602725d005364ebef61e774dd0b88/Image/Screenshot%202567-05-11%20at%2020.23.02.png
 visit website
 /Users/tanasatit/final_com2/Year1-Project-tanasatit/Image/Screenshot 2567-05-11 at 21.40.37.png
 
 Statistic page
-/Users/tanasatit/final_com2/Year1-Project-tanasatit/Image/Screenshot 2567-05-11 at 20.23.43.png
-
+https://github.com/tanasatit/Year1-Project-tanasatit/blob/0319d6dd6b3602725d005364ebef61e774dd0b88/Image/Screenshot%202567-05-11%20at%2020.23.43.png
 Data Storytelling page
-/Users/tanasatit/final_com2/Year1-Project-tanasatit/Image/Screenshot 2567-05-11 at 20.24.01.png
+https://github.com/tanasatit/Year1-Project-tanasatit/blob/0319d6dd6b3602725d005364ebef61e774dd0b88/Image/Screenshot%202567-05-11%20at%2020.24.01.png
