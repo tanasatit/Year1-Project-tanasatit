@@ -2,7 +2,7 @@ import re
 import pandas as pd
 
 
-class PlayStationBD:
+class PlayStationDB:
     def __init__(self):
         self.df = pd.read_csv('historic_deals.csv')
         self.df.dropna(inplace=True)
@@ -26,6 +26,7 @@ class PlayStationBD:
             lambda x: x.replace(',', '') if ',' in x else x)
         self.new_df['OriginalPrice(THB)'] = self.new_df['OriginalPrice(THB)'].apply(
             lambda x: float(round(float(x) * 4.65)))
+
 
         # Discount Price (Baht)
         self.new_df.rename(columns={'DiscountPrice': 'DiscountPrice(THB)'}, inplace=True)
@@ -73,15 +74,29 @@ class PlayStationBD:
         unique_genres = list(unique_genres)
         return unique_genres
 
-    def rating_count_without_outliners(self):
-        Q1 = self.new_df['Rating_count'].quantile(0.25)
-        Q3 = self.new_df['Rating_count'].quantile(0.75)
+    def without_outliners_IQR(self, attribute, df):
+        Q1 = df[attribute].quantile(0.25)
+        Q3 = df[attribute].quantile(0.75)
         IQR = Q3 - Q1
 
         lower_bound = Q1 - 1.5 * IQR
         upper_bound = Q3 + 1.5 * IQR
 
-        new_new_df = self.new_df[(self.new_df['Rating_count'] >= lower_bound)
-                                 & (self.new_df['Rating_count'] <= upper_bound)]
+        new_new_df = df[(df[attribute] >= lower_bound) & (df[attribute] <= upper_bound)]
         return new_new_df
+
+    def without_outliners_SD(self, attribute, df):
+        mean = df[attribute].mean()
+        std = df[attribute].std()
+
+        lower_bound = mean - 1.5 * std
+        upper_bound = mean + 1.5 * std
+
+        new_new_df = df[(df[attribute] >= lower_bound)
+                                 & (df[attribute] <= upper_bound)]
+        return new_new_df
+
+
+
+
 
